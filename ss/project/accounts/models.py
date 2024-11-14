@@ -38,14 +38,14 @@ class Country_Codes(models.Model):
         ordering = ['calling_code']
 
 class State(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return self.name
 
 class District(models.Model):
     name = models.CharField(max_length=255)
-    state = models.ForeignKey(State, on_delete=models.CASCADE)
+    state = models.ForeignKey(State, on_delete=models.CASCADE,null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -122,7 +122,7 @@ class User(AbstractBaseUser):
     place = models.CharField(max_length=20,blank=True,null=True)
     pin_code = models.CharField(max_length=10)
     district = models.ForeignKey('District', on_delete=models.SET_NULL, null=True, blank=True)
-    state = models.ForeignKey('State', on_delete=models.SET_NULL, null=True, blank=True)
+    state = models.ForeignKey(State, on_delete=models.SET_NULL, null=True, blank=True)
     joining_date = models.DateField(null=True,blank=True)
     watsapp = models.CharField(max_length=15, blank=True, null=True)
     email = models.EmailField(unique=True, null=True, blank=True)

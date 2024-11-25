@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from accounts.serializers import LoginSerializer
 from rest_framework import status
+
 # Create your views here.
 
 
@@ -43,5 +44,8 @@ class LoginView(APIView):
                 return Response({"detail": "Invalid email or password."}, status=401)
         else:
             return Response(serializer.errors, status=400)
+
+
+
 
 

@@ -214,7 +214,7 @@ class Dealer(models.Model):
     verification_id = models.CharField(max_length=255, blank=True, null=True)  
     verificationid_number = models.CharField(max_length=50, blank=True, null=True)  # ID number field
     id_copy = models.FileField(upload_to='id-dealer/', blank=True, null=True, validators=[validate_file_size]) 
-    
+    created_date = models.DateTimeField(default=timezone.now)
     
     def save(self, *args, **kwargs):
         if not self.custom_id:
@@ -262,7 +262,7 @@ class ServiceProvider(models.Model):
     payout_required = models.CharField(max_length=10, choices=PAYOUT_FREQUENCY_CHOICES)  # Payout frequency field
     status = models.CharField(max_length=10, choices=[('Active', 'Active'), ('Inactive', 'Inactive')])
     verification_by_dealer= models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
-
+    created_date = models.DateTimeField(default=timezone.now)
     accepted_terms = models.BooleanField(default=False)
     
     
@@ -394,6 +394,7 @@ class ServiceRegister(models.Model):
     status = models.CharField(max_length=10, choices=[('Active', 'Active'), ('Inactive', 'Inactive')],default='Inctive')
     accepted_terms = models.BooleanField(default=False)
     available_lead_balance = models.IntegerField(default=0)
+    created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.subcategory.title} by {self.service_provider}"
@@ -439,14 +440,32 @@ class ServiceRegister(models.Model):
         super(ServiceRegister, self).save(*args, **kwargs) 
    
 class PaymentRequest(models.Model):
-    service_provider = models.ForeignKey(ServiceProvider, on_delete=models.PROTECT,related_name='from_paymentrequest')
-    dealer = models.ForeignKey(Dealer, on_delete=models.PROTECT,related_name='to_paymentrequest')
+    SENDER_TYPE_CHOICES = [
+        ('DEALER', 'Dealer'),
+        ('SERVICE_PROVIDER', 'Service Provider')
+    ]
+    
+    # Generic foreign key pattern to handle multiple sender types
+    sender_type = models.CharField(max_length=20, choices=SENDER_TYPE_CHOICES)
+    dealer_sender = models.ForeignKey(Dealer, on_delete=models.PROTECT, 
+                                    null=True, blank=True, 
+                                    related_name='sent_payment_requests')
+    service_provider_sender = models.ForeignKey(ServiceProvider, 
+                                              on_delete=models.PROTECT,
+                                              null=True, blank=True,
+                                              related_name='sent_payment_requests')
+    admin = models.ForeignKey(User, on_delete=models.PROTECT, 
+                            limit_choices_to={'is_superuser': True},
+                            related_name='received_payment_requests')
+    
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     email = models.EmailField()
-    country_code = models.ForeignKey(Country_Codes,max_length=25,on_delete=models.SET_NULL,null=True,blank=True)
-    phone = models.CharField(validators=[phone_regex],max_length=15)
+    country_code = models.ForeignKey('Country_Codes', max_length=25, 
+                                   on_delete=models.SET_NULL, 
+                                   null=True, blank=True)
+    phone = models.CharField(validators=[phone_regex], max_length=15)
 
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES)
     account_holder_name = models.CharField(max_length=50)
@@ -454,13 +473,24 @@ class PaymentRequest(models.Model):
     bank_branch = models.CharField(max_length=50)
     account_number = models.CharField(max_length=50)
     ifsc_code = models.CharField(max_length=50)
-    supporting_documents = models.FileField(upload_to='payment-request/', blank=True, null=True, validators=[validate_file_size])
+    supporting_documents = models.FileField(
+        upload_to='payment-request/',
+        blank=True,
+        null=True,
+        validators=[validate_file_size]
+    )
 
+    class Meta:
+        ordering = ['-created_at']
 
-    def __str__(self):
-        return f"Request by {self.service_provider.full_name} to {self.dealer.name} for {self.amount}"
+    def _str_(self):
+        sender = self.dealer_sender if self.sender_type == 'DEALER' else self.service_provider_sender
+        return f"Payment request from {self.sender_type} {sender} for {self.amount}"
 
-
+    @property
+    def sender(self):
+        """Return the actual sender object based on sender_type"""
+        return self.dealer_sender if self.sender_type == 'DEALER' else self.service_provider_sender
 class ServiceRequest(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -491,7 +521,8 @@ class ServiceRequest(models.Model):
     def clean(self):
         # Ensure the availability_from is before availability_to
         if self.availability_from >= self.availability_to:
-            raise ValidationError('Availability "from" time must be before "to" time.')    
+            raise ValidationError('Availability "from" time must be before "to" time.')
+   
 
 class CustomerReview(models.Model):
     RATING_CHOICES = [
@@ -714,7 +745,8 @@ class Ad_Management(models.Model):
     target_area = models.CharField(max_length=100,choices=TARGET_AREA_CHOICES, default='up_to_5_km')
     total_days = models.IntegerField()
     total_amount = models.DecimalField(max_digits=5,decimal_places=2)
-    image = models.ImageField(upload_to='ad_images/',validators=[])
+    image = models.ImageField(upload_to='ad_images/',blank=True,null=True,validators=[])
+    created = models.DateTimeField(auto_now_add=True)
 
 
 class AdminProfile(models.Model):

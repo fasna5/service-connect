@@ -522,6 +522,12 @@ class ServiceRequest(models.Model):
         # Ensure the availability_from is before availability_to
         if self.availability_from >= self.availability_to:
             raise ValidationError('Availability "from" time must be before "to" time.')
+        
+    def save(self, *args, **kwargs):
+        if not self.booking_id:
+            # Generate a unique booking_id with a length of 10 characters
+            self.booking_id = str(uuid.uuid4())[:10]
+        super().save(*args, **kwargs)
    
 
 class CustomerReview(models.Model):

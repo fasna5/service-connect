@@ -26,6 +26,7 @@ urlpatterns = [
     # path('service-provider/', include('serviceprovider.urls')),
     # path('dealer/', include('dealer.urls')),
     path('franchise/',include('franchise.urls')),
+    path('adminapp/',include('adminapp.urls')),
     
     
 ]

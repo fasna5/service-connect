@@ -55,7 +55,7 @@ class FranchiseeStatsView(APIView):
                                 [first_day_of_last_month, last_day_of_last_month]
                                 ,service_provider__franchisee__user=user).count()
         if (service_currentmonth and service_last_month)==0:
-            percentage_difference_service=0
+            percentage_difference_service='0%'
         if service_last_month > 0:
             if service_currentmonth >service_last_month:
                 percentage_difference_service =f'+{ ((service_currentmonth - service_last_month) / service_last_month) * 100} %'
@@ -63,7 +63,7 @@ class FranchiseeStatsView(APIView):
                 percentage_difference_service =f'{ ((service_currentmonth - service_last_month) / service_last_month) * 100} %'
         
         else:
-            percentage_difference_service =100
+            percentage_difference_service ='100%'
         
 
         
@@ -91,7 +91,7 @@ class FranchiseeStatsView(APIView):
                                     [first_day_of_last_month, last_day_of_last_month]
                                     ,ad_user__in=service_provider_users).count()
         if (ad_currentmonth and ad_last_month)==0:
-            percentage_difference_ad=0
+            percentage_difference_ad='0%'
         if ad_last_month > 0:
             if ad_currentmonth >ad_last_month:
                 percentage_difference_ad =f'+{ ((ad_currentmonth - ad_last_month) / ad_last_month) * 100} %'
@@ -99,7 +99,7 @@ class FranchiseeStatsView(APIView):
                 percentage_difference_ad =f'{ ((ad_currentmonth - ad_last_month) / ad_last_month) * 100} %'
         
         else:
-            percentage_difference_ad =100
+            percentage_difference_ad ='100%'
         
         
 
@@ -129,7 +129,7 @@ class FranchiseeStatsView(APIView):
                        receiver__in=service_provider_users
                        ).count()
         if (complaint_currentmonth and complaint_last_month)==0:
-            percentage_difference_complaint=0
+            percentage_difference_complaint='0%'
         if complaint_last_month > 0:
             if complaint_currentmonth >complaint_last_month:
                 percentage_difference_complaint = f' +{((complaint_currentmonth - complaint_last_month) / complaint_last_month) * 100} %'
@@ -137,7 +137,7 @@ class FranchiseeStatsView(APIView):
                 percentage_difference_complaint= f' {((complaint_currentmonth - complaint_last_month) / complaint_last_month) * 100} %'
         
         else:
-            percentage_difference_complaint =100
+            percentage_difference_complaint ='100%'
 
         
 
@@ -154,7 +154,7 @@ class FranchiseeStatsView(APIView):
            franchisee=franchisee
         ).count()
         if (dealer_currentmonth and dealer_last_month)==0:
-            percentage_difference_dealer=0
+            percentage_difference_dealer='0%'
         if dealer_last_month > 0:
             if dealer_currentmonth >dealer_last_month:
                 percentage_difference_dealer = f' +{((dealer_currentmonth - dealer_last_month) / dealer_last_month) * 100} %'
@@ -162,7 +162,7 @@ class FranchiseeStatsView(APIView):
                 percentage_difference_dealer= f' {((dealer_currentmonth - dealer_last_month) / dealer_last_month) * 100} %'
         
         else:
-            percentage_difference_dealer =100
+            percentage_difference_dealer ='100%'
 
         
                  
@@ -178,7 +178,7 @@ class FranchiseeStatsView(APIView):
            franchisee=franchisee
         ).count()
         if (serviceprovider_currentmonth and serviceprovider_last_month)==0:
-            percentage_difference_serviceprovider=0
+            percentage_difference_serviceprovider='0%'
         if serviceprovider_last_month > 0:
             if serviceprovider_currentmonth >serviceprovider_last_month:
                 percentage_difference_serviceprovider = f' +{((serviceprovider_currentmonth - serviceprovider_last_month) / serviceprovider_last_month) * 100} %'
@@ -186,7 +186,7 @@ class FranchiseeStatsView(APIView):
                 percentage_difference_serviceprovider= f' {((serviceprovider_currentmonth - serviceprovider_last_month) / serviceprovider_last_month) * 100} %'
         
         else:
-            percentage_difference_serviceprovider =100
+            percentage_difference_serviceprovider ='100%'
 
 
         

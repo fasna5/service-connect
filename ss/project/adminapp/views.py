@@ -165,6 +165,7 @@ class SubcategoryListView(APIView):
             subcategory_data = request.data.get(str(subcategory.id))  # Assuming subcategory data is passed by id
             
             if subcategory_data:
+                subcategory.id=subcategory_data.get('id',subcategory.id)
                 subcategory.title = subcategory_data.get('title', subcategory.title)
                 subcategory.image=subcategory_data.get('image',subcategory.image)
                 subcategory.description = subcategory_data.get('description', subcategory.description)

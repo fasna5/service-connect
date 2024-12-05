@@ -723,7 +723,9 @@ AD_TYPE = [
     ('banner','Banner Ad'),
     ('card','Card Ad'),
     ('pop_up','Pop Up Ad'),
+    ('boosted_profile','Boosted Profile')
 ]
+
 class Ad_category(models.Model):
     # ad_title = models.CharField(max_length=100)
     ad_type = models.CharField(max_length=50,choices=AD_TYPE)
@@ -791,4 +793,11 @@ class IncomeManagement(models.Model):
 
     def __str__(self):
         return f"{self.sl_no} - {self.income_type}"
-      
+class BlockedUser(models.Model):
+    blocking_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='blocking_user', on_delete=models.CASCADE)
+    blocked_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='blocked_user', on_delete=models.CASCADE)
+    is_blocked = models.BooleanField(default=True)  # True means blocked, False means unblock
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def _str_(self):
+        return f"{self.blocking_user.email} has blocked {self.blocked_user.email}"

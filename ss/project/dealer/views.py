@@ -6,7 +6,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from accounts.models import ServiceProvider, BlockedUser, User
+from accounts.models import ServiceProvider, BlockedUser, User,Dealer
 from .serializer import BlockUserSerializer
 from django.shortcuts import get_object_or_404
 
@@ -20,16 +20,31 @@ class BlockServiceProviderView(APIView):
             blocked_user_custom_id = serializer.validated_data['blocked_user_custom_id']
             
             # Find the Dealer (the current user)
-            dealer = request.user
-            if not dealer.is_dealer:
-                return Response({"detail": "You are not authorized to block a service provider."}, status=status.HTTP_403_FORBIDDEN)
+            logged_in_user = request.user
             
-            # Find the ServiceProvider (the blocked user)
-            blocked_user = get_object_or_404(ServiceProvider, custom_id=blocked_user_custom_id)
+            # Step 2: Retrieve the associated Dealer instance for the logged-in user
+            try:
+                dealer = Dealer.objects.get(user=logged_in_user)
+            except Dealer.DoesNotExist:
+                return Response({"detail": "You are not associated with a dealer."}, status=status.HTTP_403_FORBIDDEN)
+            
+            try:
+                blocked_user = ServiceProvider.objects.get(custom_id=blocked_user_custom_id, dealer=dealer)
+            except ServiceProvider.DoesNotExist:
+                return Response({"detail": "The specified service provider is not associated with your dealership."}, status=status.HTTP_404_NOT_FOUND)
+            
+            existing_blocked_user = BlockedUser.objects.filter(
+                blocking_user=dealer.user,
+                blocked_user=blocked_user.user,
+                is_blocked=True
+            ).exists()
+            
+            if existing_blocked_user:
+                return Response({"detail": "This service provider is already blocked."}, status=status.HTTP_400_BAD_REQUEST)
             
             # Create the BlockedUser record
             blocked_user_record = BlockedUser.objects.create(
-                blocking_user=dealer,  # The current logged-in dealer
+                blocking_user=dealer.user,  # The current logged-in dealer
                 blocked_user=blocked_user.user,  # The service provider's user
                 is_blocked=True  # Mark as blocked
             )
